@@ -1,0 +1,111 @@
+{
+	"info": {
+		"_postman_id": "e24a08bc-c436-4a1c-b9da-9096131836c0",
+		"name": "DEUNA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "15584309"
+	},
+	"item": [
+		{
+			"name": "Charge",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customer\": \"CHARLIE2\",\n    \"card\": {\n        \"cvv\": \"123\",\n        \"number\": \"40010000000002\",\n        \"expiration_date\": \"12/25\",\n        \"card_holder_name\": \"Carlos Martinez\"\n    },\n    \"merchant\": \"DEUNA\",\n    \"amount\": 25\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:5053/charge"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transaction",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "merchant",
+						"value": "DEUNA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5053/charge?charge_id=66f4be9117d6fd7cda864216",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5053",
+					"path": [
+						"charge"
+					],
+					"query": [
+						{
+							"key": "charge_id",
+							"value": "66f4be9117d6fd7cda864216"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refund",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "merchant",
+						"value": "DEUNA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5053/refund?charge_id=66f4be9117d6fd7cda864216",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5053",
+					"path": [
+						"refund"
+					],
+					"query": [
+						{
+							"key": "charge_id",
+							"value": "66f4be9117d6fd7cda864216"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

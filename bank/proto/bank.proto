@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package bank;
+
+option go_package = "github.com/cimartinez3/DEUNA/bank/proto";
+
+import "google/protobuf/empty.proto";
+
+message Card {
+  string card_number =1;
+  string cvv = 2;
+  string expiration_date = 3;
+  string card_holder = 4;
+}
+
+message ChargeItem {
+  string id = 1;
+  string from = 2;
+  string to =3;
+  Card card = 4;
+  float amount=5;
+}
+
+message TransactionRequest {
+  string id = 1;
+  Card card = 2;
+  string merchant = 3;
+  float amount = 4;
+  string customer_id =5;
+}
+
+message ChargeId {
+  string  id= 1;
+}
+
+message  RefundRequest {
+  string id = 1;
+}
+
+message  TransactionResponse {
+  string message =1;
+  string charge_id =2;
+}
+
+service BankService {
+  rpc Charge (TransactionRequest) returns (TransactionResponse);
+  rpc Refund (RefundRequest) returns (google.protobuf.Empty);
+  rpc GetCharge(ChargeId) returns (ChargeItem);
+}
+
