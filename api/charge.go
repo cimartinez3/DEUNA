@@ -12,6 +12,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// ChargeHandler handles charge petition and maps if is a post to make a payment or a get to obtain charges.
 func ChargeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -25,6 +26,7 @@ func ChargeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// makeCharge makes some fields validations and send to gRPC server to do charge logic.
 func makeCharge(w http.ResponseWriter, r *http.Request) {
 	var charge types.ChargeRequest
 
@@ -65,6 +67,7 @@ func makeCharge(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// getCharge get the charge_id from query param and send to gRPC to get the charge.
 func getCharge(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("charge_id")
 

@@ -1,5 +1,6 @@
 package types
 
+// ChargeRequest request sent in charge post api.
 type ChargeRequest struct {
 	Customer string   `json:"customer"`
 	Card     CardItem `json:"card"`
@@ -7,6 +8,7 @@ type ChargeRequest struct {
 	Amount   float32  `json:"amount"`
 }
 
+// CardItem field from ChargeRequest.
 type CardItem struct {
 	Cvv            string `json:"cvv"`
 	Number         string `json:"number"`

@@ -9,6 +9,7 @@ import (
 	pb "github.com/cimartinez3/DEUNA/bank/proto"
 )
 
+// RefundHandler handles API petition and calls gRPC client to make a refund.
 func RefundHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("charge_id")
 

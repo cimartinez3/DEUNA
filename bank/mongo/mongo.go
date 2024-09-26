@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// IMongo defines the methods to interact with mongo db.
 type IMongo interface {
 	CreateCustomer(ctx context.Context, req *proto.TransactionRequest) primitive.ObjectID
 	CreateCharge(ctx context.Context, req *proto.TransactionRequest) primitive.ObjectID
@@ -24,12 +25,14 @@ type IMongo interface {
 	RefundAmounts(ctx context.Context, charge *types.Charge) error
 }
 
+// GatewayMongo defines dependencies for GatewayMongo.
 type GatewayMongo struct {
 	merchantCollection     *mongo.Collection
 	customerCollection     *mongo.Collection
 	transactionsCollection *mongo.Collection
 }
 
+// NewMongoGateway initializes a new GatewayMongo to access IMongo functions.
 func NewMongoGateway(m, c, t *mongo.Collection) IMongo {
 	return &GatewayMongo{
 		merchantCollection:     m,
@@ -38,6 +41,7 @@ func NewMongoGateway(m, c, t *mongo.Collection) IMongo {
 	}
 }
 
+// CreateCustomer inserts customer in mongo collection.
 func (g *GatewayMongo) CreateCustomer(ctx context.Context, req *proto.TransactionRequest) primitive.ObjectID {
 	customer := types.CustomerItem{
 		CustomerId: req.CustomerId,
@@ -61,6 +65,7 @@ func (g *GatewayMongo) CreateCustomer(ctx context.Context, req *proto.Transactio
 	return oid
 }
 
+// CreateCharge inserts a charge in transactions collection.
 func (g *GatewayMongo) CreateCharge(ctx context.Context, req *proto.TransactionRequest) primitive.ObjectID {
 	trx := types.Charge{
 		From: req.CustomerId,
@@ -86,6 +91,7 @@ func (g *GatewayMongo) CreateCharge(ctx context.Context, req *proto.TransactionR
 	return oid
 }
 
+// UpdateMerchantBalance makes an update in balance field from merchant adding the amount value.
 func (g *GatewayMongo) UpdateMerchantBalance(ctx context.Context, request *proto.TransactionRequest, merchant *types.Merchant) error {
 	update := bson.D{{"$inc", bson.D{{"balance", request.Amount}}}}
 
@@ -96,6 +102,7 @@ func (g *GatewayMongo) UpdateMerchantBalance(ctx context.Context, request *proto
 	return nil
 }
 
+// UpdateCustomerBalance makes an update in balance field from customer subtracting the amount value.
 func (g *GatewayMongo) UpdateCustomerBalance(ctx context.Context, request *proto.TransactionRequest, customer *types.CustomerItem) error {
 	update := bson.D{{"$inc", bson.D{{"balance", request.Amount * -1}}}}
 
@@ -107,16 +114,19 @@ func (g *GatewayMongo) UpdateCustomerBalance(ctx context.Context, request *proto
 	return nil
 }
 
+// GetCustomer returns a customer with a specific card.
 func (g *GatewayMongo) GetCustomer(ctx context.Context, request *proto.TransactionRequest, customerItem *types.CustomerItem) error {
 	return g.customerCollection.FindOne(ctx, bson.D{{"$and", []interface{}{
 		bson.D{{"customer_id", request.CustomerId}},
 		bson.D{{"card.number", request.Card.CardNumber}}}}}).Decode(customerItem)
 }
 
+// GetMerchant returns merchant by name.
 func (g *GatewayMongo) GetMerchant(ctx context.Context, request *proto.TransactionRequest, merchantItem *types.Merchant) error {
 	return g.merchantCollection.FindOne(ctx, bson.M{"name": request.Merchant}).Decode(merchantItem)
 }
 
+// GetTransaction returns transaction by charge_id.
 func (g *GatewayMongo) GetTransaction(ctx context.Context, id string, chargeItem *types.Charge) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -126,6 +136,8 @@ func (g *GatewayMongo) GetTransaction(ctx context.Context, id string, chargeItem
 	return g.transactionsCollection.FindOne(ctx, bson.M{"_id": oid}).Decode(chargeItem)
 }
 
+// RefundAmounts makes a rollback of a charge. It takes the amount from the original transaction and adds to de balance of the customer.
+// Then it subtract that value from the merchant balance. Finally, it creates a new transaction with transaction type refund.
 func (g *GatewayMongo) RefundAmounts(ctx context.Context, charge *types.Charge) error {
 	query := bson.D{{"$and", []interface{}{
 		bson.D{{"customer_id", charge.From}},

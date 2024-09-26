@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Charge maks a payment from a customer to a merchant.
 func (b *BankService) Charge(ctx context.Context, request *proto.TransactionRequest) (*proto.TransactionResponse, error) {
 	log.Println("Making new charge")
 
@@ -44,6 +45,7 @@ func (b *BankService) Charge(ctx context.Context, request *proto.TransactionRequ
 	return &proto.TransactionResponse{Message: "SUCCESS", ChargeId: id.Hex()}, nil
 }
 
+// GetCharge returns specific charge by charge_id.
 func (b *BankService) GetCharge(ctx context.Context, request *proto.ChargeId) (*proto.ChargeItem, error) {
 	log.Println(fmt.Sprintf("Query charge %s", request.Id))
 	charge := &types.Charge{}

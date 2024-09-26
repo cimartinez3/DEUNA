@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+// Refund gets balance of a charge and returns it to the customer.
 func (b *BankService) Refund(ctx context.Context, request *proto.RefundRequest) (*emptypb.Empty, error) {
 	charge := &types.Charge{}
 	if err := b.mongoGtw.GetTransaction(ctx, request.Id, charge); err != nil {

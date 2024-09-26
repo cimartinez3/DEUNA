@@ -65,8 +65,19 @@ It will respond something like this
    ![img.png](img.png)
 You will notice in mongo that the customer's balance has been increased the amount of the original charge. And the merchant balance will decreased the value of the original amount.
 
+
+### TECHNOLOGY DISCUSSION
+
+* Go: Its high performance fits perfect for a platform that could take hundreds of transactions per minute.
+* Docker: Is a fast and simple way to get a functional database. It is also fast to set up connection from code.
+* Mongo: Its implementation with docker makes easy and fast to start working rapidly without configure any database client or installing in your local PC some database.
+* Grpc: It allows high performance and low latency providing faster transmission between server and client. The messages have smaller size than a Json object. These advantages are crucial for a platform that has to manage lots of transactions per second
+* Mockery: Powerful tool that allows to create mocks for unit tests. In this project is used for mocking mongo services.
+
+
 ### IMPROVEMENTS
 
 * Create encrypt and decrypt function so card data wont be saved in clear and a token will be saved instead.
 * Use environment variables to set credentials for the database connection using a cloud service as SystemManager from AWS SDK.
 * Create unit tests for all services.
+* Implement Xray service from AWS to trail the time it takes in each step and know where to make improvements.
