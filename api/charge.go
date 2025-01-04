@@ -1,44 +1,29 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"context"
-	"encoding/json"
 	"github.com/cimartinez3/DEUNA/api/types"
 	"github.com/cimartinez3/DEUNA/api/validator"
 	pb "github.com/cimartinez3/DEUNA/bank/proto"
+	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
+	"log"
+	"net/http"
 )
 
-// ChargeHandler handles charge petition and maps if is a post to make a payment or a get to obtain charges.
-func ChargeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	switch r.Method {
-	case "POST":
-		makeCharge(w, r)
-	case "GET":
-		getCharge(w, r)
-	default:
-		http.Error(w, "wrong request", http.StatusBadRequest)
-	}
-}
-
 // makeCharge makes some fields validations and send to gRPC server to do charge logic.
-func makeCharge(w http.ResponseWriter, r *http.Request) {
+func makeCharge(c *gin.Context) {
 	var charge types.ChargeRequest
 
-	err := json.NewDecoder(r.Body).Decode(&charge)
+	err := c.Bind(&charge)
 	if err != nil {
-		http.Error(w, "wrong request", http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	validate := validator.NewChargeValidator()
 	if err = validate.ValidateTransaction(charge); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -55,37 +40,31 @@ func makeCharge(w http.ResponseWriter, r *http.Request) {
 		CustomerId: charge.Customer,
 	})
 	if err != nil {
-		json.NewEncoder(w).Encode(struct {
-			Message string `json:"message"`
-		}{Message: err.Error()})
-
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	log.Println("CHARGE SUCCESSFULLY")
 
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, response)
 }
 
 // getCharge get the charge_id from query param and send to gRPC to get the charge.
-func getCharge(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("charge_id")
+func getCharge(c *gin.Context) {
+	id := c.Query("charge_id")
 
 	if id == "" {
-		http.Error(w, "charge id cant be empty", http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id cant be empty"})
 		return
 	}
 
 	response, err := grpcClient.GetCharge(context.Background(), &pb.ChargeId{Id: id})
 	if err != nil {
-		json.NewEncoder(w).Encode(struct {
-			Message string `json:"message"`
-		}{Message: err.Error()})
-
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	log.Println("FOUND CHARGE")
 
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, response)
 }

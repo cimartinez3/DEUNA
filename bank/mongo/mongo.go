@@ -13,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// PATTERN REPOSITORY
+
 // IMongo defines the methods to interact with mongo db.
 type IMongo interface {
 	CreateCustomer(ctx context.Context, req *proto.TransactionRequest) primitive.ObjectID
